@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <title>Finishing QuickBooks sign-in</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <h1>Finishing QuickBooks sign-in&hellip;</h1>
+  <p class="meta">Claude Bookkeeping Agent MCP &mdash; GOSS Auto Parts Ltd.</p>
+  <p id="msg">Handing the sign-in back to the app on this computer.</p>
+  <p id="manual" hidden>If nothing happens, make sure the app's sign-in command
+  is still running on this computer, then
+  <a id="link" href="#">click here to continue</a>.</p>
+</main>
+<script>
+  // QuickBooks redirects here (public HTTPS, as Intuit requires for production)
+  // with a one-time authorization code. This page stores nothing and sends
+  // nothing anywhere else: it only passes the query string to the sign-in
+  // helper listening on this same computer. The code is single-use, expires in
+  // minutes, and cannot be exchanged without the app's client secret, which
+  // never leaves that computer.
+  (function () {
+    var q = window.location.search;
+    var params = new URLSearchParams(q);
+    var msg = document.getElementById('msg');
+    if (params.get('error')) {
+      msg.textContent = 'QuickBooks sign-in was not completed: ' + params.get('error');
+      return;
+    }
+    if (!params.get('code') || !params.get('state')) {
+      msg.textContent = 'This page is only used during QuickBooks sign-in. There is nothing to do here.';
+      return;
+    }
+    var target = 'http://localhost:8000/callback' + q;
+    document.getElementById('link').href = target;
+    document.getElementById('manual').hidden = false;
+    window.location.replace(target);
+  })();
+</script>
+</body>
+</html>
